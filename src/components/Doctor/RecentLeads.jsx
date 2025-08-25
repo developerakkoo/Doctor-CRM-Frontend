@@ -130,7 +130,7 @@ export default function RecentLeads() {
                     {openMenu === idx && (
                       <div
                         className="absolute right-8 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
-                        // keep clicks inside from bubbling to the row if you have row click handlers
+  
                         onClick={(e) => e.stopPropagation()}
                       >
                         <ul className="py-1 text-sm text-gray-700">
