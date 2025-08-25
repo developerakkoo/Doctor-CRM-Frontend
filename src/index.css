@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* in index.css or App.css */
+.input {
+  @apply border border-gray-300 rounded px-3 py-2 w-full;
+}
+
+
+/* In index.css or Tailwind layer */
+.input {
+  @apply w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
