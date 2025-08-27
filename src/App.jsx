@@ -7,6 +7,8 @@ import AllLeads from "./pages/Doctor/AllLeads";
 import DoctorLayout from "./layouts/DoctorLayout";
 import Footer from "../src/pages/Doctor/Footer";
 import Appointment from "./pages/Appointments/DoctorAppointments/Appointment";
+import Settings from "./pages/Doctor/Settings";
+import Analytics from "./pages/Doctor/Analytics";
 
 import PatientDashboard from "./pages/Patient/PatientDashboard";
 import BookAppointment from "./pages/Patient/BookAppointment";
@@ -63,6 +65,25 @@ const App = () => {
               </DoctorLayout>
             }
           />
+
+          <Route
+            path="/settings"
+            element={
+              <DoctorLayout>
+                <Settings />
+              </DoctorLayout>
+            }
+          />
+
+          <Route
+            path="/analytics"
+            element={
+              <DoctorLayout>
+                <Analytics />
+              </DoctorLayout>
+            }
+          />
+
 
           {/* Patient Dashboard */}
           <Route path="/pdashboard" element={<PatientDashboard />} />
