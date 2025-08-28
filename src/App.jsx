@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Doctor/Dashboard";
-import DoctorAuth from "./pages/Doctor/DoctorAuth";
+import DoctorAuth from "./pages/Doctor/DoctorAuth/DoctorAuth";
 import AddLead from "./pages/Doctor/AddLead";
 import AllLeads from "./pages/Doctor/AllLeads";
 import DoctorLayout from "./layouts/DoctorLayout";
