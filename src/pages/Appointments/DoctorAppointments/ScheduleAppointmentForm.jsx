@@ -215,9 +215,9 @@ const ScheduleAppointmentForm = ({ isOpen, onClose, onSchedule }) => {
               >
                 <option value="">Appointment Type *</option>
                 <option value="Consultation">Consultation</option>
-                <option value="follow-up">Follow-up</option>
+                <option value="Follow-up">Follow-up</option>
                 <option value="Treatment">Treatment</option>
-                <option value="emergency">Emergency</option>
+                <option value="Emergency">Emergency</option>
               </select>
 
               <select

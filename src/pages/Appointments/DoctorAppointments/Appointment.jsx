@@ -11,6 +11,12 @@ const Appointments = () => {
   const [loading, setLoading] = useState(true);
   const [viewFilter, setViewFilter] = useState("today");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [rescheduleId, setRescheduleId] = useState(null); // new
+  const [newDateTime, setNewDateTime] = useState("");
+
+  const [newDate, setNewDate] = useState("");  // for date
+  const [newTime, setNewTime] = useState("");  // for time
+
 
   const doctorToken = localStorage.getItem("doctorToken");
 
@@ -35,33 +41,87 @@ const Appointments = () => {
     };
     return <span className={`px-2 py-1 text-xs rounded ${typeConfig[type] || "bg-gray-200 text-gray-600"}`}>{type}</span>;
   };
+  // Add new state
+  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
 
-  // Fetch today's appointments from API
+  // Fetch today's appointments + upcoming appointments
   useEffect(() => {
-    const fetchTodaysAppointments = async () => {
+    const fetchAppointments = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
+
+        // 1. Today's Appointments
+        const todayRes = await axios.get(
           "http://localhost:9191/api/v1/doctors/appointments/today",
           { headers: { Authorization: `Bearer ${doctorToken}` } }
         );
-        const appts = response.data.appointments || [];
-        setTodaysAppointments(appts);
-        setAppointments(appts);
+        const todays = todayRes.data.appointments || [];
+        setTodaysAppointments(todays);
+
+        // 2. Upcoming Appointments
+        const upcomingRes = await axios.get(
+          "http://localhost:9191/api/v1/doctors/upcoming-appointments",
+          { headers: { Authorization: `Bearer ${doctorToken}` } }
+        );
+        const upcoming = upcomingRes.data.appointments || [];
+        setUpcomingAppointments(upcoming);
+
+        // merge all for stats
+        setAppointments([...todays, ...upcoming]);
+
       } catch (error) {
-        const errMsg = error.response?.data?.message || "Failed to load today's appointments.";
+        const errMsg = error.response?.data?.message || "Failed to load appointments.";
         toast.error(errMsg);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTodaysAppointments();
+    fetchAppointments();
   }, [doctorToken]);
 
-  const upcomingAppointments = appointments.filter(
-    (apt) => new Date(apt.appointmentDate) > new Date()
-  );
+
+
+
+  const openReschedulePopup = (appointmentId) => {
+    setRescheduleId(appointmentId);
+  };
+
+  // Function to close popup
+  const closeReschedulePopup = () => {
+    setRescheduleId(null);
+    setNewDateTime("");
+  };
+
+  // Function to submit reschedule
+ const handleRescheduleSubmit = async () => {
+  if (!newDate || !newTime) {
+    return toast.error("Please select a new date & time");
+  }
+
+  const newDateTime = `${newDate}T${newTime}`; // combine for backend
+
+  try {
+    await axios.patch(
+      `http://localhost:9191/api/v1/doctors/appointments/edit/${rescheduleId}`,
+      { appointmentDate: newDateTime },
+      { headers: { Authorization: `Bearer ${doctorToken}` } }
+    );
+    toast.success("Appointment rescheduled successfully!");
+    closeReschedulePopup();
+
+    // Refresh upcoming appointments
+    const upcomingRes = await axios.get(
+      "http://localhost:9191/api/v1/doctors/upcoming-appointments",
+      { headers: { Authorization: `Bearer ${doctorToken}` } }
+    );
+    setUpcomingAppointments(upcomingRes.data.appointments || []);
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to reschedule appointment");
+  }
+};
+
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen mt-12">
@@ -154,7 +214,7 @@ const Appointments = () => {
       </div>
 
 
-    
+
 
       {/* Today's Appointments */}
       <div className="bg-white shadow rounded p-4 mb-6">
@@ -230,40 +290,119 @@ const Appointments = () => {
 
 
       {/* Upcoming Appointments */}
-      <div className="bg-white rounded shadow p-4">
-        <h2 className="text-lg font-semibold mb-4">Upcoming Appointments</h2>
-        {upcomingAppointments.length === 0 ? (
+      <div className="bg-white shadow rounded p-4 mb-6">
+        <h2 className="text-lg font-semibold flex items-center mb-4">
+          <Calendar className="w-5 h-5 text-blue-600 mr-2" />
+          Upcoming Appointments
+        </h2>
+
+        {loading ? (
+          <p className="text-gray-500">Loading upcoming appointments...</p>
+        ) : upcomingAppointments.length === 0 ? (
           <p className="text-gray-500">No upcoming appointments.</p>
         ) : (
           <div className="space-y-4">
             {upcomingAppointments.map((appointment) => (
-              <div key={appointment._id || appointment.id} className="border rounded p-4 hover:bg-gray-50 transition">
-                <div className="flex justify-between">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-sm font-medium">
-                        {new Date(appointment.appointmentDate).toLocaleDateString()} at {appointment.appointmentTime}
-                      </span>
-                      <span className="font-semibold">{appointment.name || appointment.patientName}</span>
-                      {getTypeBadge(appointment.appointmentType || appointment.type)}
-                      {getStatusBadge(appointment.status)}
+              <div
+                key={appointment._id || `${appointment.patientId}-${appointment.appointmentDate}`}
+                className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition flex justify-between items-start relative"
+              >
+                <div className="flex-1">
+                  {/* Existing appointment info */}
+                  <div className="flex flex-wrap items-center gap-4 mb-2">
+                    <div className="flex items-center text-sm text-gray-700">
+                      <Calendar className="w-4 h-4 text-blue-600 mr-1" />
+                      {new Date(appointment.appointmentDate).toLocaleDateString()}
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
-                      <div>{appointment.phone}</div>
-                      <div>{appointment.email}</div>
-                      <div>{appointment.location}</div>
+                    <div className="flex items-center text-sm font-semibold text-gray-800">
+                      <User className="w-4 h-4 text-gray-500 mr-1" />
+                      {appointment.name}
                     </div>
-                    {appointment.notes && (
-                      <p className="text-sm text-gray-500 mt-2 italic">{appointment.notes}</p>
-                    )}
+                    {getTypeBadge(appointment.appointmentType?.toLowerCase() || "consultation")}
+                    {getStatusBadge(appointment.status?.toLowerCase())}
                   </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-gray-500">
+                    <div className="flex items-center">
+                      <Mail className="w-3 h-3 mr-1" />
+                      {appointment.email}
+                    </div>
+                    <div className="flex items-center">
+                      <Phone className="w-3 h-3 mr-1" />
+                      {appointment.phone}
+                    </div>
+                    <div className="flex items-center">
+                      <MapPin className="w-3 h-3 mr-1" />
+                      {appointment.location}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons + Dropdown */}
+                <div className="flex flex-col space-y-2 ml-4 relative">
+                  <button
+                    className="text-blue-600 border border-blue-600 px-3 py-1 rounded text-sm hover:bg-blue-50"
+                    onClick={() => setRescheduleId(appointment._id)}
+                  >
+                    Reschedule
+                  </button>
+                  <button className="text-green-600 border border-green-600 px-3 py-1 rounded text-sm hover:bg-green-50">
+                    Email
+                  </button>
+
+                  {/* Reschedule Dropdown (opens to the left of the button) */}
+                  {rescheduleId === appointment._id && (
+                    <div className="absolute right-full top-0 mr-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                      <div className="p-4">
+                        <h3 className="text-sm font-semibold mb-3">Reschedule Appointment</h3>
+
+                        <label className="block text-xs font-medium mb-2">Select New Date & Time</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="date"
+                            value={newDate}
+                            onChange={(e) => setNewDate(e.target.value)}
+                            className="w-1/2 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <input
+                            type="time"
+                            value={newTime}
+                            onChange={(e) => setNewTime(e.target.value)}
+                            className="w-1/2 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+
+                        <div className="flex justify-end gap-2 mt-2">
+                          <button
+                            className="px-3 py-1.5 text-sm bg-gray-200 rounded hover:bg-gray-300"
+                            onClick={closeReschedulePopup}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                            onClick={handleRescheduleSubmit}
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                 </div>
               </div>
             ))}
+
           </div>
         )}
       </div>
+
+
+
+
     </div>
+
+
   );
 };
 
