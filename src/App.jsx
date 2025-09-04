@@ -1,14 +1,20 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Doctor/Dashboard";
-import DoctorAuth from "./pages/Doctor/DoctorAuth/DoctorAuth";
+import Login from "./pages/Doctor/DoctorAuth/Login";
+import Registration from "./pages/Doctor/DoctorAuth/Registration";
+import ForgotPassword from "./pages/Doctor/DoctorAuth/ForgotPassword";
+
 import AddLead from "./pages/Doctor/AddLead";
 import AllLeads from "./pages/Doctor/AllLeads";
 import DoctorLayout from "./layouts/DoctorLayout";
-import Footer from "../src/pages/Doctor/Footer";
+// import Footer from "../src/pages/Doctor/Footer";
 import Appointment from "./pages/Appointments/DoctorAppointments/Appointment";
 import Settings from "./pages/Doctor/Settings";
 import Analytics from "./pages/Doctor/Analytics";
+import GoogleCallback from "./pages/GoogleCallback";
+
+
 
 import PatientDashboard from "./pages/Patient/PatientDashboard";
 import BookAppointment from "./pages/Patient/BookAppointment";
@@ -26,7 +32,11 @@ const App = () => {
       <main className="flex-grow">
         <Routes>
           {/* Auth Page */}
-          <Route path="/" element={<DoctorAuth />} />
+          <Route path="/" element={<Login />} />
+
+        {/* Other pages */}
+        <Route path="/doctor/register" element={<Registration />} />
+        <Route path="/doctor/forgot-password" element={<ForgotPassword />} />
 
           {/* ✅ Appointments Route inside Doctor Layout */}
           <Route
@@ -84,6 +94,8 @@ const App = () => {
             }
           />
 
+          <Route path="/auth/google/callback" element={<GoogleCallback />} />
+
 
           {/* Patient Dashboard */}
           <Route path="/pdashboard" element={<PatientDashboard />} />
@@ -101,7 +113,7 @@ const App = () => {
       </main>
 
       {/* Sticky Footer */}
-      <Footer />
+      {/* <Footer /> */}
     </Router>
   );
 };

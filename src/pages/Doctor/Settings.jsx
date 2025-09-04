@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { User, Bell, Settings as SettingsIcon } from "lucide-react";
+import { User, Settings as SettingsIcon } from "lucide-react";
+import toast from "react-hot-toast";
 
 const Settings = () => {
-  const doctorId = localStorage.getItem("doctorId"); // <-- define here
+  const doctorId = localStorage.getItem("doctorId");
 
   const [profileSettings, setProfileSettings] = useState({
     firstName: "",
@@ -20,25 +21,29 @@ const Settings = () => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("doctorToken");
-        const res = await fetch(`http://localhost:9191/api/v1/doctors/profile/${doctorId}`, {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-        });
+        const res = await fetch(
+          `http://localhost:9191/api/v1/doctors/profile/${doctorId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         const data = await res.json();
+
         if (data.success) {
           const doctor = data.data;
-          const nameParts = doctor.name.split(" ");
+          const nameParts = (doctor.name || "").split(" ");
           setProfileSettings({
             firstName: nameParts[0] || "",
             lastName: nameParts.slice(1).join(" ") || "",
             email: doctor.email || "",
             phone: doctor.phone || "",
-            title: "Dr.",
+            title: doctor.title || "Dr.",
             specialty: doctor.specialty || "",
-            license: doctor.license || "",
-            bio: doctor.bio || ""
+            license: doctor.licenseNumber || "",
+            bio: doctor.professionalBio || "",
           });
         } else {
           console.error("API returned error:", data.message);
@@ -48,41 +53,50 @@ const Settings = () => {
       }
     };
 
-    fetchProfile();
+    if (doctorId) fetchProfile();
   }, [doctorId]);
 
-  // Save profile
-  const handleSaveProfile = async () => {
-    try {
-      const token = localStorage.getItem("doctorToken");
-      const res = await fetch(`http://localhost:9191/api/v1/doctors/update/${doctorId}`, {
+
+
+  // save profile
+
+const handleSaveProfile = async () => {
+  try {
+    const token = localStorage.getItem("doctorToken");
+    const res = await fetch(
+      `http://localhost:9191/api/v1/doctors/update/${doctorId}`,
+      {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          name: profileSettings.firstName + " " + profileSettings.lastName,
+          name: `${profileSettings.firstName} ${profileSettings.lastName}`,
           email: profileSettings.email,
           phone: profileSettings.phone,
+          title: profileSettings.title,
           specialty: profileSettings.specialty,
-          license: profileSettings.license,
-          bio: profileSettings.bio
+          licenseNumber: profileSettings.license,
+          professionalBio: profileSettings.bio,
         }),
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        alert("Profile updated successfully!");
-      } else {
-        alert("Failed to update profile.");
-        console.error(data);
       }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Error updating profile.");
+    );
+
+    const data = await res.json();
+
+    if (res.ok) {
+      toast.success(data.message || "Profile updated successfully!");
+    } else {
+      toast.error(data.message || "Failed to update profile.");
+      console.error("Update error:", data);
     }
-  };
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    toast.error("Error updating profile.");
+  }
+};
+
 
   return (
     <div className="p-6 space-y-6 mt-9">
@@ -90,7 +104,9 @@ const Settings = () => {
       <div className="flex items-center justify-between pb-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Settings</h1>
-          <p className="text-gray-500 mt-1">Manage your account and application preferences</p>
+          <p className="text-gray-500 mt-1">
+            Manage your account and application preferences
+          </p>
         </div>
         <SettingsIcon className="h-8 w-8 text-blue-600" />
       </div>
@@ -104,50 +120,70 @@ const Settings = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">First Name</label>
+            <label className="block text-sm font-medium text-gray-700">
+              First Name
+            </label>
             <input
               className="mt-1 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={profileSettings.firstName}
-              onChange={(e) => setProfileSettings({ ...profileSettings, firstName: e.target.value })}
+              onChange={(e) =>
+                setProfileSettings({ ...profileSettings, firstName: e.target.value })
+              }
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Last Name</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Last Name
+            </label>
             <input
               className="mt-1 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={profileSettings.lastName}
-              onChange={(e) => setProfileSettings({ ...profileSettings, lastName: e.target.value })}
+              onChange={(e) =>
+                setProfileSettings({ ...profileSettings, lastName: e.target.value })
+              }
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email Address</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Email Address
+            </label>
             <input
               type="email"
               className="mt-1 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={profileSettings.email}
-              onChange={(e) => setProfileSettings({ ...profileSettings, email: e.target.value })}
+              onChange={(e) =>
+                setProfileSettings({ ...profileSettings, email: e.target.value })
+              }
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Phone Number
+            </label>
             <input
               className="mt-1 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={profileSettings.phone}
-              onChange={(e) => setProfileSettings({ ...profileSettings, phone: e.target.value })}
+              onChange={(e) =>
+                setProfileSettings({ ...profileSettings, phone: e.target.value })
+              }
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Title</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Title
+            </label>
             <select
               className="mt-1 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={profileSettings.title}
-              onChange={(e) => setProfileSettings({ ...profileSettings, title: e.target.value })}
+              onChange={(e) =>
+                setProfileSettings({ ...profileSettings, title: e.target.value })
+              }
             >
               <option>Dr.</option>
               <option>Mr.</option>
@@ -156,30 +192,42 @@ const Settings = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Specialty</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Specialty
+            </label>
             <input
               className="mt-1 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={profileSettings.specialty}
-              onChange={(e) => setProfileSettings({ ...profileSettings, specialty: e.target.value })}
+              onChange={(e) =>
+                setProfileSettings({ ...profileSettings, specialty: e.target.value })
+              }
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">License Number</label>
+            <label className="block text-sm font-medium text-gray-700">
+              License Number
+            </label>
             <input
               className="mt-1 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={profileSettings.license}
-              onChange={(e) => setProfileSettings({ ...profileSettings, license: e.target.value })}
+              onChange={(e) =>
+                setProfileSettings({ ...profileSettings, license: e.target.value })
+              }
             />
           </div>
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Professional Bio</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Professional Bio
+          </label>
           <textarea
             className="mt-1 w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows="3"
             value={profileSettings.bio}
-            onChange={(e) => setProfileSettings({ ...profileSettings, bio: e.target.value })}
+            onChange={(e) =>
+              setProfileSettings({ ...profileSettings, bio: e.target.value })
+            }
           />
         </div>
 

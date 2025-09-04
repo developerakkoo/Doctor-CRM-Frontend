@@ -82,7 +82,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="flex">
+    <div className="flex bg-gradient-to-br from-blue-50 to-teal-50">
       <Sidebar />
       <div className="flex-1 bg-gray-50 min-h-screen pt-18 px-8 pb-8">
         <Navbar />
