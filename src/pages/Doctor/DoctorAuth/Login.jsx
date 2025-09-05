@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate, Link } from "react-router-dom";
-import { toast } from "react-hot-toast";;
+import { toast } from "react-hot-toast";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Navbar from "./Navbar";
 import "react-toastify/dist/ReactToastify.css";
-
-
 
 const Login = () => {
   const navigate = useNavigate();
@@ -24,45 +22,38 @@ const Login = () => {
     localStorage.setItem("doctorId", doctorId);
   };
 
-  // Normal Email/Password Login
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    console.log("Form Data:", formData);
+  // ✅ Normal Email/Password Login
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(
+        "http://localhost:9191/api/v1/doctors/login",
+        formData,
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-    const res = await axios.post(
-      "http://localhost:9191/api/v1/doctors/login",
-      formData,
-      { headers: { "Content-Type": "application/json" } }
-    );
+      if (!res.data.token) {
+        toast.error(res.data.message || "Login failed!");
+        return;
+      }
 
-    console.log("Response:", res.data);
+      const decoded = jwtDecode(res.data.token);
+      saveDoctorSession(res.data.token, formData.email, decoded?.doctorId);
 
-    if (!res.data.token) {
-      toast.error(res.data.message || "Login failed!");
-      return;
+      navigate("/doctor/dashboard", {
+        state: { toastMessage: "Login successful 🎉" },
+      });
+    } catch (error) {
+      console.error("Login Error:", error.response || error);
+      toast.error(error.response?.data?.message || "Something went wrong!");
     }
+  };
 
-    const decoded = jwtDecode(res.data.token);
-    console.log("Decoded token:", decoded);
-    saveDoctorSession(res.data.token, formData.email, decoded?.doctorId);
-
-    navigate("/doctor/dashboard", {
-      state: { toastMessage: "Login successful 🎉" },
-    });
-  } catch (error) {
-    console.error("Login Error:", error.response || error);
-    toast.error(error.response?.data?.message || "Something went wrong!");
-  }
+const handleGoogleLogin = () => {
+  window.location.href = "http://localhost:9191/api/v1/doctors/auth/google";
 };
 
 
-
-  // Google Auth Login
-  const handleGoogleLogin = () => {
-    // Redirect to backend Google OAuth endpoint
-    window.location.href = "http://localhost:9191/api/v1/doctors/auth/google";
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50 px-4">
@@ -122,16 +113,15 @@ const Login = () => {
             Login
           </button>
 
-{/* Forgot password */}
-<div className="flex justify-end mt-2">
-  <Link
-    to="/doctor/forgot-password"
-    className="inline-block px-3 py-1 text-sm font-medium text-blue-600 border border-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-colors duration-200"
-  >
-    Forgot Password?
-  </Link>
-</div>
-
+          {/* Forgot password */}
+          <div className="flex justify-end mt-2">
+            <Link
+              to="/doctor/forgot-password"
+              className="inline-block px-3 py-1 text-sm font-medium text-blue-600 border border-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-colors duration-200"
+            >
+              Forgot Password?
+            </Link>
+          </div>
         </form>
 
         {/* Divider */}
@@ -141,7 +131,7 @@ const Login = () => {
           <span className="flex-grow border-t border-gray-300"></span>
         </div>
 
-        {/* Google Login */}
+        {/* ✅ Google Login */}
         <button
           onClick={handleGoogleLogin}
           className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 font-medium p-2 rounded-lg hover:bg-gray-200 transition"

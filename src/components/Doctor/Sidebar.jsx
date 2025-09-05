@@ -27,8 +27,8 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
   ];
 
   const tools = [
-    { label: "Reports", icon: <FiFileText size={18} />, path: "/reports" },
-    { label: "Activity", icon: <FiActivity size={18} />, path: "/activity" },
+    // { label: "Reports", icon: <FiFileText size={18} />, path: "/reports" },
+    // { label: "Activity", icon: <FiActivity size={18} />, path: "/activity" },
     { label: "Settings", icon: <FiSettings size={18} />, path: "/settings" },
   ];
 

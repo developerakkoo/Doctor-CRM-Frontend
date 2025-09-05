@@ -5,6 +5,7 @@ import Login from "./pages/Doctor/DoctorAuth/Login";
 import Registration from "./pages/Doctor/DoctorAuth/Registration";
 import ForgotPassword from "./pages/Doctor/DoctorAuth/ForgotPassword";
 
+
 import AddLead from "./pages/Doctor/AddLead";
 import AllLeads from "./pages/Doctor/AllLeads";
 import DoctorLayout from "./layouts/DoctorLayout";
@@ -12,7 +13,8 @@ import DoctorLayout from "./layouts/DoctorLayout";
 import Appointment from "./pages/Appointments/DoctorAppointments/Appointment";
 import Settings from "./pages/Doctor/Settings";
 import Analytics from "./pages/Doctor/Analytics";
-import GoogleCallback from "./pages/GoogleCallback";
+// import GoogleCallback from "./pages/GoogleCallback";
+import GoogleAuthHandler from "./pages/Doctor/DoctorAuth/GoogleAuthHandler";
 
 
 
@@ -33,6 +35,9 @@ const App = () => {
         <Routes>
           {/* Auth Page */}
           <Route path="/" element={<Login />} />
+
+          {/* ✅ After Google login success */}
+        <Route path="/auth/google" element={<GoogleAuthHandler />} />
 
         {/* Other pages */}
         <Route path="/doctor/register" element={<Registration />} />
@@ -94,7 +99,7 @@ const App = () => {
             }
           />
 
-          <Route path="/auth/google/callback" element={<GoogleCallback />} />
+          {/* <Route path="/google/callback" element={<GoogleCallback />} /> */}
 
 
           {/* Patient Dashboard */}

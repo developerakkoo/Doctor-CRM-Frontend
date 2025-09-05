@@ -32,17 +32,17 @@ const Analytics = () => {
 
         // Fetch stats
         const statsRes = await fetch("http://localhost:9191/api/v1/doctors/stats", {
-          headers: { "Authorization": `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         const statsData = await statsRes.json();
         if (statsData.success) setStats(statsData.data);
 
         // Fetch patients
         const patientsRes = await fetch("http://localhost:9191/api/v1/doctors/patients", {
-          headers: { "Authorization": `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         const patientsData = await patientsRes.json();
-        const patients = patientsData.patients;
+        const patients = patientsData.patients || [];
 
         // --- Lead Trends (month-wise aggregation) ---
         const months = [
@@ -90,21 +90,14 @@ const Analytics = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 mt-9">
+    <div className="p-6 space-y-6">
       {/* Header */}
-      <header className="flex justify-between items-center mb-6">
+      <header className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">Analytics Dashboard</h1>
-        {/* <div>
-          <select className="border rounded px-3 py-2 text-gray-700">
-            <option>Last 7 Days</option>
-            <option>Last 30 Days</option>
-            <option>This Year</option>
-          </select>
-        </div> */}
       </header>
 
       {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white shadow rounded-lg p-4 flex items-center justify-between">
           <div>
             <p className="text-gray-500 text-sm">Total Leads</p>

@@ -1,4 +1,3 @@
-// src/pages/GoogleCallback.jsx
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -12,7 +11,13 @@ export default function GoogleCallback() {
 
     if (token) {
       localStorage.setItem("doctorToken", token);
-      navigate("/doctor/dashboard");
+      console.log("✅ Token saved to localStorage");
+
+      // Redirect to dashboard
+      navigate("/doctor/dashboard", { replace: true });
+    } else {
+      console.error("❌ No token found in callback URL");
+      navigate("/login");
     }
   }, [location, navigate]);
 

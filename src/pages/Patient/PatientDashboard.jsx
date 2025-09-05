@@ -10,7 +10,7 @@ import {
   PersonStanding
 } from "lucide-react";
 import { motion } from "framer-motion";
-import DashboardLayout from "../../layouts/DashboardLayout";
+import DashboardLayout from "../../layouts/PatientDashboardLayout";
 
 
 

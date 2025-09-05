@@ -6,18 +6,24 @@ const DoctorLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex">
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar */}
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+
+      {/* Main content */}
       <div
-        className={`flex-1 transition-all duration-300 ${
+        className={`flex-1 flex flex-col transition-all duration-300 ${
           collapsed ? "ml-20" : "ml-64"
         }`}
       >
+        {/* Navbar */}
         <Navbar />
-        <div className="p-4">{children}</div>
+
+        {/* Page content */}
+        <main className="flex-1 p-6 pt-20 overflow-y-auto">{children}</main>
       </div>
     </div>
   );
 };
 
-export default DoctorLayout;
+export default DoctorLayout;   // 👈 FIX: make sure this line exists

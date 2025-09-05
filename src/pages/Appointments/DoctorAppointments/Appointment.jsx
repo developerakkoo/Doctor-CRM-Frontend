@@ -3,6 +3,8 @@ import axios from "axios";
 import ScheduleAppointmentForm from "./ScheduleAppointmentForm";
 import toast from "react-hot-toast";
 import { Calendar, Clock, User, Phone, Mail, MapPin } from "lucide-react";
+ import {jwtDecode} from "jwt-decode";
+   import dayjs from "dayjs";
 
 const Appointments = () => {
   const [open, setOpen] = useState(false);
@@ -79,6 +81,75 @@ const Appointments = () => {
 
     fetchAppointments();
   }, [doctorToken]);
+
+
+
+ 
+
+const getDoctorEmailFromToken = () => {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+
+  try {
+    const decoded = jwtDecode(token);
+    console.log("Decoded token:", decoded);
+
+    // If backend includes email in token payload
+    return decoded.email || decoded.doctorEmail || null;
+  } catch (err) {
+    console.error("Invalid token:", err);
+    return null;
+  }
+};
+
+
+
+
+
+
+const sendEmailNotification = async (appointment) => {
+  try {
+    const token = localStorage.getItem("token");
+    const doctorEmail = localStorage.getItem("doctorEmail") // ✅ use this instead
+
+    console.log("📧 Debug emails:", {
+      patientEmail: appointment.email,
+      doctorEmail,
+    });
+
+    if (!appointment.email || !doctorEmail) {
+      toast.error("❌ Missing patient or doctor email");
+      return;
+    }
+
+    const response = await axios.post(
+      "http://localhost:9191/api/v1/doctors/appointments/notify",
+      {
+        name: appointment.name,
+        email: appointment.email,
+        phone: appointment.phone,
+        appointmentType: appointment.appointmentType,
+        duration: appointment.duration,
+        appointmentDate: dayjs(appointment.appointmentDate).format("YYYY-MM-DD"),
+        appointmentTime: dayjs(appointment.appointmentTime, "HH:mm").format("h:mm A"),
+        location: appointment.location,
+        notes: appointment.notes || "No notes",
+        patientEmail: appointment.email,
+        doctorEmail: doctorEmail, // ✅ comes from token
+      },
+      { headers: { Authorization: `Bearer ${doctorToken}` } }
+    );
+
+    toast.success("✅ Email sent successfully!");
+    console.log("Notify API response:", response.data);
+  } catch (error) {
+    console.error("Error sending email:", error.response?.data || error);
+    toast.error("❌ Failed to send email. Please try again.");
+  }
+};
+
+
+
 
 
 
@@ -277,9 +348,13 @@ const Appointments = () => {
                   <button className="text-blue-600 border border-blue-600 px-3 py-1 rounded text-sm hover:bg-blue-50">
                     Call
                   </button>
-                  <button className="text-green-600 border border-green-600 px-3 py-1 rounded text-sm hover:bg-green-50">
-                    Email
-                  </button>
+                  <button
+  onClick={() => sendEmailNotification(appointment)}
+  className="text-green-600 border border-green-600 px-3 py-1 rounded text-sm hover:bg-green-50"
+>
+  Email
+</button>
+
                 </div>
               </div>
             ))}

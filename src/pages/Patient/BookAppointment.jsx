@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar } from "lucide-react";
-import DashboardLayout from "../../layouts/DashboardLayout";
+import DashboardLayout from "../../layouts/PatientDashboardLayout";
 
 const appointmentTypes = ["Consultation", "Follow-up", "Check-up", "Emergency"];
 const departments = ["General", "Cardiology", "Dermatology", "Orthopedics"];

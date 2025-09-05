@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import DashboardLayout from "../../layouts/DashboardLayout";
+import DashboardLayout from "../../layouts/PatientDashboardLayout";
 import { Search, Plus, Clock, AlertTriangle, CheckCircle2, Pill } from "lucide-react";
 
 // Mock medication data
