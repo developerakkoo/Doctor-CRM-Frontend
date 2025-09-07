@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import Navbar from "./Navbar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // ✅ Import useNavigate
 
 const ForgotPassword = () => {
-  const [step, setStep] = useState("request"); // ✅ Default step is "request"
+  const [step, setStep] = useState("request");
   const [forgotEmail, setForgotEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const navigate = useNavigate(); // ✅ Hook for navigation
 
   const handleForgotPasswordRequest = async (e) => {
     e.preventDefault();
@@ -18,7 +20,7 @@ const ForgotPassword = () => {
         email: forgotEmail,
       });
       toast.success("OTP sent to your email!");
-      setStep("reset"); // ✅ Move to reset step
+      setStep("reset");
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong!");
     }
@@ -37,7 +39,14 @@ const ForgotPassword = () => {
         newPassword,
       });
       toast.success("Password reset successfully!");
-      setStep("request"); // ✅ Reset flow back to email request
+
+      // ✅ Redirect after short delay (so toast can show)
+      setTimeout(() => {
+        navigate("/"); // redirect to login page
+      }, 1500);
+
+      // Clear state
+      setStep("request");
       setForgotEmail("");
       setOtp("");
       setNewPassword("");

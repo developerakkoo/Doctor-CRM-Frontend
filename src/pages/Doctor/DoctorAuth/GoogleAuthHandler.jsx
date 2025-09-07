@@ -21,6 +21,7 @@ const GoogleAuthHandler = () => {
         "doctorUser",
         JSON.stringify({ id, name, email })
       );
+      localStorage.setItem("doctorEmail", email)
 
       navigate("/doctor/dashboard");
     } else {

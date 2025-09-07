@@ -221,21 +221,21 @@ const Registration = () => {
             className="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-400"
           ></textarea>
 
-          {/* <input
+          <input
             type="file"
             name="profile"
             accept="image/*"
             onChange={handleFileChange}
             className="w-full text-sm"
-          />
+          /> 
 
-          <input
+          {/* <input
             type="file"
             name="degreePhoto"
             accept="image/*"
             onChange={handleFileChange}
             className="w-full text-sm"
-          /> */}
+          />  */}
 
           <input
             type="email"
