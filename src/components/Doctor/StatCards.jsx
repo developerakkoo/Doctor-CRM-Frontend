@@ -35,7 +35,7 @@ const StatCards = () => {
           }
         );
 
-        // ✅ Monthly change (already returns percentageChange + text)
+        // ✅ Monthly change
         const monthRes = await axios.get(
           "http://localhost:9191/api/v1/doctors/patient-stats/months",
           {
@@ -46,7 +46,7 @@ const StatCards = () => {
         const monthChange = monthData.percentageChange || 0;
         const monthText = monthData.text || "";
 
-        // ✅ Weekly change (already returns percentageChange + text)
+        // ✅ Weekly change
         const weekChangeRes = await axios.get(
           "http://localhost:9191/api/v1/doctors/patient-stats/weeks",
           {
@@ -57,6 +57,16 @@ const StatCards = () => {
         const weeklyChange = weeklyData.percentageChange || 0;
         const weeklyText = weeklyData.text || "";
 
+        // ✅ Appointments count
+        const appointmentsRes = await axios.get(
+          "http://localhost:9191/api/v1/doctors/appointments/count",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const appointments = appointmentsRes.data?.totalAppointments || 0;
+
+
         setStats({
           total: totalRes.data?.data?.total || 0,
           totalChange: monthChange.toFixed(2),
@@ -64,7 +74,7 @@ const StatCards = () => {
           weekly: weekRes.data?.count || 0,
           weeklyChange: weeklyChange.toFixed(2),
           weeklyText: weeklyText,
-          appointments: 15, // connect API later
+          appointments: appointments, // ✅ now dynamic
           conversionRate: 34, // connect API later
         });
       } catch (err) {

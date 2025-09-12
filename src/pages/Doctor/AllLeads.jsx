@@ -336,23 +336,179 @@ const AllLeads = () => {
         </table>
       </div>
 
-      {/* ✅ Patient Details/Edit Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 px-2">
-          <div className="bg-white w-full max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl p-6 rounded-xl shadow-lg max-h-[90vh] overflow-y-auto relative">
-            <button
-              className="absolute top-3 right-3 text-gray-600 hover:text-black"
-              onClick={() => {
-                setShowModal(false);
-                setIsEditing(false);
-              }}
-            >
-              ✖
-            </button>
-            {/* You can add full details/edit form here */}
+{showModal && (
+  <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 px-2">
+    <div className="bg-white w-full max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl p-6 rounded-xl shadow-lg max-h-[90vh] overflow-y-auto relative">
+      {/* Close Button */}
+      <button
+        className="absolute top-3 right-3 text-gray-600 hover:text-black"
+        onClick={() => {
+          setShowModal(false);
+          setIsEditing(false);
+        }}
+      >
+        ✖
+      </button>
+
+      {detailsLoading ? (
+        <p className="text-center py-6">Loading...</p>
+      ) : selectedPatient ? (
+        isEditing ? (
+          /* ✅ Edit Form */
+          <div>
+            <h2 className="text-xl font-semibold mb-4">
+              Edit: {formData.firstName} {formData.lastName}
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <input
+                type="text"
+                className="border p-2 rounded"
+                placeholder="First Name"
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+              />
+              <input
+                type="text"
+                className="border p-2 rounded"
+                placeholder="Last Name"
+                value={formData.lastName}
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+              />
+              <input
+                type="email"
+                className="border p-2 rounded"
+                placeholder="Email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+              <input
+                type="tel"
+                className="border p-2 rounded"
+                placeholder="Phone"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
+              <input
+                type="date"
+                className="border p-2 rounded"
+                value={formData.dob}
+                onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+              />
+              <input
+                type="text"
+                className="border p-2 rounded"
+                placeholder="Insurance"
+                value={formData.insurance}
+                onChange={(e) => setFormData({ ...formData, insurance: e.target.value })}
+              />
+              <input
+                type="text"
+                className="border p-2 rounded"
+                placeholder="Address"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              />
+              <select
+                className="border p-2 rounded"
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              >
+                <option value="new">New</option>
+                <option value="contact">Contact</option>
+                <option value="converted">Converted</option>
+              </select>
+              <select
+                className="border p-2 rounded"
+                value={formData.priority}
+                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+              <input
+                type="text"
+                className="border p-2 rounded"
+                placeholder="Referred By"
+                value={formData.referredBy}
+                onChange={(e) => setFormData({ ...formData, referredBy: e.target.value })}
+              />
+              <textarea
+                className="border p-2 rounded col-span-2"
+                placeholder="Notes"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              />
+            </div>
+
+            {/* ✅ Buttons */}
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Save Changes
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          /* ✅ Details View */
+          <div>
+            <h2 className="text-xl font-semibold mb-4">
+              {selectedPatient.firstName} {selectedPatient.lastName}
+            </h2>
+            <div className="space-y-2">
+              <p><strong>Patient ID:</strong> {selectedPatient.patientId}</p>
+              <p><strong>Email:</strong> {selectedPatient.email}</p>
+              <p><strong>Phone:</strong> {selectedPatient.phone}</p>
+              <p><strong>DOB:</strong> {selectedPatient.dob}</p>
+              <p><strong>Insurance:</strong> {selectedPatient.insurance}</p>
+              <p><strong>Address:</strong> {selectedPatient.address}</p>
+              <p><strong>Source:</strong> {selectedPatient.source}</p>
+              <p><strong>Status:</strong> {selectedPatient.status}</p>
+              <p><strong>Priority:</strong> {selectedPatient.priority}</p>
+              <p><strong>Referred By:</strong> {selectedPatient.referredBy}</p>
+              <p><strong>Notes:</strong> {selectedPatient.notes}</p>
+            </div>
+            <button
+              onClick={() => {
+                setFormData({
+                  firstName: selectedPatient.firstName,
+                  lastName: selectedPatient.lastName,
+                  email: selectedPatient.email,
+                  phone: selectedPatient.phone,
+                  dob: selectedPatient.dob,
+                  insurance: selectedPatient.insurance,
+                  address: selectedPatient.address,
+                  source: selectedPatient.source,
+                  status: selectedPatient.status,
+                  priority: selectedPatient.priority,
+                  referredBy: selectedPatient.referredBy,
+                  notes: selectedPatient.notes,
+                });
+                setIsEditing(true);
+              }}
+              // className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600
+                   >
+             
+            </button>
+          </div>
+        )
+      ) : (
+        <p className="text-center py-6">No patient details found.</p>
       )}
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 };
