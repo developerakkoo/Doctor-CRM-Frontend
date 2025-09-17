@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Mail, Phone, MoreHorizontal, Eye, Edit, PhoneCall } from "lucide-react";
 import axios from "axios";
+import ReactDOM from "react-dom";
 
 export default function RecentLeads() {
   const [leads, setLeads] = useState([]);
@@ -161,43 +162,45 @@ export default function RecentLeads() {
       )}
 
       {/* Modal (closes only via ✖) */}
-      {selectedPatient && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-20">
-          <div className="bg-white w-2/3 p-6 rounded-xl shadow-lg relative max-h-[90vh] overflow-y-auto">
-            <button
-              className="absolute top-3 right-3 text-gray-600 hover:text-black"
-              onClick={() => setSelectedPatient(null)}
-            >
-              ✖
-            </button>
-            {profileLoading ? (
-              <p className="text-gray-500">Loading profile...</p>
-            ) : (
-              <div>
-                <h2 className="text-xl font-semibold mb-4">
-                  {selectedPatient.firstName} {selectedPatient.lastName}
-                </h2>
-                <p><b>Patient ID:</b> {selectedPatient.patientId}</p>
-                <p><b>Email:</b> {selectedPatient.email}</p>
-                <p><b>Phone:</b> {selectedPatient.phone}</p>
-                <p>
-                  <b>DOB:</b>{" "}
-                  {selectedPatient.dob
-                    ? new Date(selectedPatient.dob).toLocaleDateString()
-                    : "N/A"}
-                </p>
-                <p><b>Insurance:</b> {selectedPatient.insuranceProvider || "N/A"}</p>
-                <p><b>Address:</b> {selectedPatient.address || "N/A"}</p>
-                <p><b>Source:</b> {selectedPatient.source || "N/A"}</p>
-                <p><b>Status:</b> {selectedPatient.initialStatus || "N/A"}</p>
-                <p><b>Priority:</b> {selectedPatient.priority || "N/A"}</p>
-                <p><b>Referred By:</b> {selectedPatient.referredBy || "N/A"}</p>
-                <p><b>Notes:</b> {selectedPatient.initialNotes || "N/A"}</p>
-              </div>
-            )}
+      {selectedPatient &&
+  ReactDOM.createPortal(
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[9999]">
+      <div className="bg-white w-2/3 p-6 rounded-xl shadow-lg relative max-h-[90vh] overflow-y-auto">
+        <button
+          className="absolute top-3 right-3 text-gray-600 hover:text-black"
+          onClick={() => setSelectedPatient(null)}
+        >
+          ✖
+        </button>
+        {profileLoading ? (
+          <p className="text-gray-500">Loading profile...</p>
+        ) : (
+          <div>
+            <h2 className="text-xl font-semibold mb-4">
+              {selectedPatient.firstName} {selectedPatient.lastName}
+            </h2>
+            <p><b>Patient ID:</b> {selectedPatient.patientId}</p>
+            <p><b>Email:</b> {selectedPatient.email}</p>
+            <p><b>Phone:</b> {selectedPatient.phone}</p>
+            <p>
+              <b>DOB:</b>{" "}
+              {selectedPatient.dob
+                ? new Date(selectedPatient.dob).toLocaleDateString()
+                : "N/A"}
+            </p>
+            <p><b>Insurance:</b> {selectedPatient.insuranceProvider || "N/A"}</p>
+            <p><b>Address:</b> {selectedPatient.address || "N/A"}</p>
+            <p><b>Source:</b> {selectedPatient.source || "N/A"}</p>
+            <p><b>Status:</b> {selectedPatient.initialStatus || "N/A"}</p>
+            <p><b>Priority:</b> {selectedPatient.priority || "N/A"}</p>
+            <p><b>Referred By:</b> {selectedPatient.referredBy || "N/A"}</p>
+            <p><b>Notes:</b> {selectedPatient.initialNotes || "N/A"}</p>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+    </div>,
+    document.body // 👈 mount on body so it overlays sidebar + navbar
+  )}
 
     </div>
   );
