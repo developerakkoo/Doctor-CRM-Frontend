@@ -1,93 +1,49 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import StatCards from "../../components/Doctor/StatCards";
 import RecentLeads from "../../components/Doctor/RecentLeads";
 import QuickActions from "../../components/Doctor/QuickActions";
 import { UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
 
+// ✅ Fetch function
+const fetchDoctorProfile = async (doctorId, token) => {
+  const res = await fetch(`http://localhost:9191/api/v1/doctors/profile/${doctorId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch doctor profile");
+  return res.json();
+};
+
 const Dashboard = () => {
-  const [doctorName, setDoctorName] = useState("Loading...");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
-
-  // ✅ Get token + user from localStorage
-  const token = localStorage.getItem("doctorToken");
   const doctorId = localStorage.getItem("doctorId");
-  const storedUser = localStorage.getItem("doctorUser");
+  const token = localStorage.getItem("doctorToken");
 
-  useEffect(() => {
-    if (!token) {
-      setError("Session expired or not found. Please login again.");
-      setLoading(false);
-      return;
-    }
-
-    // ✅ If Google login already saved full user object
-    if (storedUser) {
-      try {
-        const user = JSON.parse(storedUser);
-        setDoctorName(user.name || "Doctor");
-
-        toast.success(`Welcome back, ${user.name || "Doctor"} 🎉`, {
-          id: "login-success",
-        });
-
-        setLoading(false);
-        return; // stop here, no need to call API again
-      } catch (err) {
-        console.error("Failed to parse stored user:", err);
-      }
-    }
-
-    // ✅ Otherwise fetch from backend using doctorId
-    if (doctorId) {
-      fetch(`http://localhost:9191/api/v1/doctors/profile/${doctorId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch doctor profile");
-          return res.json();
-        })
-        .then((data) => {
-          console.log("Doctor profile data:", data);
-          if (data?.data?.name) {
-            setDoctorName(data.data.name);
-          } else {
-            setDoctorName("Doctor");
-          }
-
-          toast.success(`Welcome back, ${data?.data?.name || "Doctor"} 🎉`, {
-            id: "login-success",
-          });
-
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("Error fetching doctor profile:", err);
-          setError("Error fetching doctor profile");
-          toast.error("Failed to load doctor profile ❌");
-          setLoading(false);
-        });
-    } else {
-      setError("Doctor ID missing. Please login again.");
-      setLoading(false);
-    }
-  }, [doctorId, token, storedUser]);
-
-  // ✅ Logout function
-  const handleLogout = () => {
-    localStorage.removeItem("doctorId");
-    localStorage.removeItem("doctorToken");
-    localStorage.removeItem("doctorUser");
+  if (!doctorId || !token) {
     navigate("/login");
-  };
+    return null;
+  }
 
-  if (loading) {
+  // ✅ React Query (v5 syntax)
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["doctorProfile", doctorId],
+    queryFn: () => fetchDoctorProfile(doctorId, token),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    onSuccess: (data) => {
+      const name = data?.data?.name || "Doctor";
+      toast.success(`Welcome back, ${name} 🎉`, { id: "login-success" });
+    },
+  });
+
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         Loading...
@@ -98,7 +54,7 @@ const Dashboard = () => {
   if (error) {
     return (
       <div className="flex flex-col justify-center items-center h-screen text-red-600 font-semibold space-y-4">
-        <p>{error}</p>
+        <p>{error.message}</p>
         <button
           onClick={() => navigate("/login")}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -108,6 +64,8 @@ const Dashboard = () => {
       </div>
     );
   }
+
+  const doctorName = data?.data?.name || "Doctor";
 
   return (
     <div className="p-6 space-y-8">
@@ -121,7 +79,6 @@ const Dashboard = () => {
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* ✅ Navigate to Add Lead Page */}
           <button
             onClick={() => navigate("/add-lead")}
             className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
@@ -129,14 +86,6 @@ const Dashboard = () => {
             <UserPlus size={18} />
             <span>Add New Lead</span>
           </button>
-
-          {/* ✅ Logout */}
-          {/* <button
-            onClick={handleLogout}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
-          >
-            Logout
-          </button> */}
         </div>
       </div>
 
